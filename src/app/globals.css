@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/*
+  Sentinel brand tokens — do not invent values (SENTINEL_MASTER_BUILD_PROMPT §4).
+  Light backgrounds are the default everywhere. Charcoal is text / thin structure
+  and product-UI chrome only — never a full-section marketing background (SOUL §6.2).
+*/
+@theme {
+  --color-sentinel-red: #cc1e1e;
+  --color-sentinel-charcoal: #1e1e1e;
+  --color-sentinel-offwhite: #f6f5f1;
+  --color-sentinel-white: #ffffff;
+
+  /* Functional status colors — product UI only, never marketing (SOUL §6.2) */
+  --color-ok-text: #2e7d5b;
+  --color-ok-bg: #eaf4ef;
+  --color-gap-text: #c77e12;
+  --color-gap-bg: #fcf1df;
+  --color-bad-text: #cc1e1e;
+  --color-bad-bg: #fbeaea;
+
+  --font-sans: var(--font-barlow);
+  --font-display: var(--font-barlow-condensed);
+}
+
+:root {
+  --background: #f6f5f1;
+  --foreground: #1e1e1e;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-barlow), system-ui, sans-serif;
+}
+
+/* The wordmark full-stop is non-negotiable (SOUL §6.1). */
+.wordmark {
+  font-family: var(--font-barlow-condensed), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.wordmark-dot {
+  color: var(--color-sentinel-red);
+}

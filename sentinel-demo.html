@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel — Walk-in Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap');
+  :root{--charcoal:#1E1E1E;--red:#CC1E1E;--cream:#F6F5F1;--white:#fff;--mute:#7a7a76;--linelight:#e6e4de;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:#ece9e2;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;gap:16px;}
+  h1,h2,.wordmark{font-family:'Barlow Condensed',sans-serif;}
+
+  .toggle{display:inline-flex;background:#fff;border:1px solid var(--linelight);border-radius:30px;padding:3px;}
+  .toggle button{border:none;background:none;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;padding:8px 18px;border-radius:30px;cursor:pointer;color:var(--mute);}
+  .toggle button.on{background:var(--red);color:#fff;}
+
+  body.mode-warehouse .hc-only{display:none;}
+  body.mode-healthcare .wh-only{display:none;}
+
+  .device{width:420px;max-width:94vw;height:720px;background:var(--white);border-radius:28px;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.25);border:6px solid var(--charcoal);}
+  .slide{position:absolute;inset:0;padding:40px 30px 90px;display:none;flex-direction:column;color:var(--charcoal);background:var(--white);}
+  .slide.active{display:flex;}
+  .accent-bar{position:absolute;top:0;left:0;width:100%;height:8px;background:var(--red);}
+  .slidecontent{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:14px;}
+  .big{font-size:33px;font-weight:700;text-transform:uppercase;line-height:1.1;margin-bottom:16px;color:var(--charcoal);}
+  .big em{font-style:normal;color:var(--red);}
+  .p{font-size:15px;color:var(--mute);line-height:1.6;max-width:300px;}
+
+  .stat-row{display:flex;gap:16px;margin-top:22px;}
+  .statbox{background:var(--cream);border-radius:8px;padding:14px 16px;flex:1;border:1px solid var(--linelight);}
+  .statbox .n{font-family:'Barlow Condensed';font-size:26px;font-weight:700;color:var(--red);}
+  .statbox .l{font-size:11px;color:var(--mute);margin-top:2px;}
+
+  .fake-row{display:flex;justify-content:space-between;align-items:center;background:var(--cream);border:1px solid var(--linelight);border-radius:6px;padding:11px 14px;margin-bottom:8px;font-size:12.5px;color:var(--charcoal);}
+  .fake-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;text-transform:uppercase;}
+  .fs-ok{background:#e2f2e9;color:#1f7a4f;} .fs-gap{background:#faecd6;color:#a16a15;}
+
+  .plan-mini{background:var(--cream);border:1px solid var(--linelight);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+  .plan-mini.feat{border:1.5px solid var(--red);}
+  .plan-mini h3{font-family:'Barlow';font-size:14px;font-weight:600;margin-bottom:4px;color:var(--charcoal);}
+  .plan-mini .price{font-family:'Barlow Condensed';font-size:22px;font-weight:700;color:var(--charcoal);}
+  .plan-mini .price span{font-size:11px;color:var(--mute);font-family:'Barlow';}
+
+  .cta-box{text-align:center;}
+  .wordmark{font-size:30px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px;color:var(--charcoal);}
+  .wordmark span{color:var(--red);}
+
+  .controls{position:absolute;bottom:0;left:0;right:0;padding:18px 28px 22px;background:linear-gradient(transparent,rgba(255,255,255,.9) 40%);display:flex;align-items:center;justify-content:space-between;z-index:2;}
+  .dots{display:flex;gap:6px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--linelight);}
+  .dot.on{background:var(--red);width:18px;border-radius:4px;}
+  .navbtn{background:var(--cream);color:var(--charcoal);border:1px solid var(--linelight);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Barlow';}
+  .navbtn:hover{border-color:var(--charcoal);}
+  .navbtn:disabled{opacity:.3;cursor:default;}
+  .navbtn.primary{background:var(--red);color:#fff;border:none;}
+  .navbtn.primary:hover{background:#a81717;}
+</style>
+</head>
+<body class="mode-warehouse">
+
+<div class="toggle">
+  <button id="tgl-wh" class="on" onclick="setMode('warehouse')">Warehouse</button>
+  <button id="tgl-hc" onclick="setMode('healthcare')">Healthcare</button>
+</div>
+
+<div class="device">
+
+  <div class="slide active" data-i="0">
+    <div class="accent-bar"></div>
+    <div class="slidecontent">
+      <div class="eyebrow">Every shift, right now</div>
+      <div class="big wh-only">Your safety checks are on <em>paper.</em></div>
+      <div class="big hc-only">Your compliance logs are on <em>paper.</em></div>
+      <p class="p wh-only">Which means nobody actually knows if today's forklift, dock, and racking checks got done — until someone goes looking. Usually after an incident or an audit.</p>
+      <p class="p hc-only">Which means nobody actually knows if today's cleaning, sterilizer, and temp logs got done — until someone goes looking. Usually during an inspection.</p>
+      <div class="stat-row">
+        <div class="statbox"><div class="n">0</div><div class="l">Real-time visibility today</div></div>
+        <div class="statbox"><div class="n">?</div><div class="l">What's missing right now</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-i="1">
+    <div class="accent-bar"></div>
+    <div class="slidecontent">
+      <div class="eyebrow">The fix</div>
+      <div class="big">A tap replaces the clipboard.</div>
+      <p class="p">We place NFC/QR tags at every required check point. Staff tap, it's recorded — timestamped, unchangeable, instant.</p>
+    </div>
+  </div>
+
+  <div class="slide" data-i="2">
+    <div class="accent-bar"></div>
+    <div class="slidecontent">
+      <div class="eyebrow">What you'd see, live</div>
+      <div class="big" style="font-size:26px;">Your dashboard, this shift</div>
+      <div style="margin-top:10px;" class="wh-only">
+        <div class="fake-row"><span>Forklift Pre-Shift — Unit 4</span><span class="fake-status fs-ok">Compliant</span></div>
+        <div class="fake-row"><span>Dock Door 3 Check</span><span class="fake-status fs-gap">Gap — due 2pm</span></div>
+        <div class="fake-row"><span>Racking Damage Walk</span><span class="fake-status fs-ok">Compliant</span></div>
+      </div>
+      <div style="margin-top:10px;" class="hc-only">
+        <div class="fake-row"><span>Cleaning Log — Room 3</span><span class="fake-status fs-ok">Compliant</span></div>
+        <div class="fake-row"><span>Sterilizer Check</span><span class="fake-status fs-gap">Gap — due 2pm</span></div>
+        <div class="fake-row"><span>Fire Extinguisher — Visual</span><span class="fake-status fs-ok">Compliant</span></div>
+      </div>
+      <p class="p" style="margin-top:14px;">You'd know about that gap the moment it opened — not next week.</p>
+    </div>
+  </div>
+
+  <div class="slide" data-i="3">
+    <div class="accent-bar"></div>
+    <div class="slidecontent">
+      <div class="eyebrow">Simple pricing</div>
+      <div class="big" style="font-size:26px;margin-bottom:16px;">Priced per location</div>
+      <div class="wh-only">
+        <div class="plan-mini"><h3>Shift Proof Starter</h3><div class="price">$299<span>/mo</span></div></div>
+        <div class="plan-mini feat"><h3>Operations Proof Plus</h3><div class="price">$499<span>/mo</span></div></div>
+        <div class="plan-mini"><h3>Managed</h3><div class="price">$699<span>+/mo</span></div></div>
+      </div>
+      <div class="hc-only">
+        <div class="plan-mini"><h3>Proof Logs Starter</h3><div class="price">$199<span>/mo</span></div></div>
+        <div class="plan-mini feat"><h3>Proof Logs Plus</h3><div class="price">$399<span>/mo</span></div></div>
+        <div class="plan-mini"><h3>Managed</h3><div class="price">$699<span>+/mo</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-i="4">
+    <div class="accent-bar"></div>
+    <div class="slidecontent cta-box">
+      <svg viewBox="0 0 120 140" width="40" height="46" style="margin:0 auto 10px;display:block;"><path d="M60,8 C76,8 92,16 92,16 L92,56 C92,88 78,108 60,124 C42,108 28,88 28,56 L28,16 C28,16 44,8 60,8 Z" fill="none" stroke="#CC1E1E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/><path d="M74,40 C58,40 50,46 50,55 C50,66 70,66 70,77 C70,88 62,94 46,94" fill="none" stroke="#CC1E1E" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="wordmark">Sentinel<span>.</span></div>
+      <p class="p" style="margin:0 auto 20px;">We can tag this facility and have your team logging by the end of the week.</p>
+      <div class="p" style="font-weight:600;color:var(--charcoal);">Ready to see it on your own floor?</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="navbtn" id="backBtn" onclick="go(-1)" disabled>Back</button>
+    <div class="dots" id="dots"></div>
+    <button class="navbtn primary" id="nextBtn" onclick="go(1)">Next</button>
+  </div>
+</div>
+
+<script>
+  let i = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((s,idx)=>{ const d=document.createElement('div'); d.className='dot'+(idx===0?' on':''); dotsEl.appendChild(d); });
+  function render(){
+    slides.forEach((s,idx)=>s.classList.toggle('active', idx===i));
+    document.querySelectorAll('.dot').forEach((d,idx)=>d.classList.toggle('on', idx===i));
+    document.getElementById('backBtn').disabled = i===0;
+    document.getElementById('nextBtn').textContent = i===slides.length-1 ? 'Restart' : 'Next';
+  }
+  function go(dir){
+    if(i===slides.length-1 && dir===1){ i=0; render(); return; }
+    i = Math.max(0, Math.min(slides.length-1, i+dir));
+    render();
+  }
+  function setMode(mode){
+    document.body.classList.remove('mode-warehouse','mode-healthcare');
+    document.body.classList.add('mode-'+mode);
+    document.getElementById('tgl-wh').classList.toggle('on', mode==='warehouse');
+    document.getElementById('tgl-hc').classList.toggle('on', mode==='healthcare');
+  }
+</script>
+</body>
+</html>

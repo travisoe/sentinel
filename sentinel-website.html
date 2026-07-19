@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel Safety — Compliance, Proven.</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap');
+  :root{--charcoal:#1E1E1E;--red:#CC1E1E;--white:#FFFFFF;--cream:#F6F5F1;--linelight:#e6e4de;--mute:#6f6e69;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Barlow',sans-serif;color:var(--charcoal);background:var(--white);}
+  h1,h2,h3,.wordmark,.navlink{font-family:'Barlow Condensed',sans-serif;}
+
+  /* mode toggle visibility */
+  body.mode-warehouse .hc-only{display:none;}
+  body.mode-healthcare .wh-only{display:none;}
+
+  header{position:sticky;top:0;background:var(--white);z-index:50;border-bottom:1px solid var(--linelight);}
+  .navwrap{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;gap:20px;flex-wrap:wrap;}
+  .wordmark{color:var(--charcoal);font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
+  .wordmark span{color:var(--red);}
+  .navlinks{display:flex;gap:26px;align-items:center;}
+  .navlink{color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;text-transform:uppercase;letter-spacing:.03em;}
+  .navlink:hover{color:var(--red);}
+  .navcta{background:var(--red);color:#fff;padding:10px 20px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Barlow',sans-serif;}
+  .navcta:hover{background:#a81717;}
+
+  /* industry toggle */
+  .toggle{display:inline-flex;background:var(--cream);border:1px solid var(--linelight);border-radius:30px;padding:3px;}
+  .toggle button{border:none;background:none;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;padding:7px 16px;border-radius:30px;cursor:pointer;color:var(--mute);}
+  .toggle button.on{background:var(--red);color:#fff;}
+
+  .hero{position:relative;background:var(--cream);padding:80px 28px 84px;overflow:hidden;}
+  .hero .accent{position:absolute;top:0;bottom:0;right:6%;width:6px;background:var(--red);}
+  .hero .accent2{position:absolute;top:0;bottom:0;right:calc(6% + 30px);width:6px;background:var(--charcoal);opacity:.12;}
+  .herowrap{max-width:1100px;margin:0 auto;position:relative;z-index:2;}
+  .eyebrow{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:16px;}
+  h1.headline{font-size:56px;font-weight:700;line-height:1.03;max-width:660px;text-transform:uppercase;color:var(--charcoal);}
+  h1.headline em{font-style:normal;color:var(--red);}
+  .subhead{font-family:'Barlow';font-size:17px;color:var(--mute);max-width:500px;margin:22px 0 30px;line-height:1.6;}
+  .herobtns{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{padding:13px 26px;border-radius:5px;font-size:14px;font-weight:600;text-decoration:none;display:inline-block;}
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:hover{background:#a81717;}
+  .btn-outline{border:1.5px solid var(--charcoal);color:var(--charcoal);}
+  .btn-outline:hover{border-color:var(--red);color:var(--red);}
+
+  section{padding:76px 28px;}
+  .wrap{max-width:1100px;margin:0 auto;}
+  .kicker{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:10px;}
+  h2.h{font-size:34px;font-weight:600;text-transform:uppercase;max-width:600px;margin-bottom:16px;color:var(--charcoal);}
+  .lede{font-size:16px;color:var(--mute);max-width:560px;line-height:1.65;margin-bottom:44px;}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--linelight);border:1px solid var(--linelight);}
+  .step{background:#fff;padding:28px 24px;}
+  .step .tag{font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;}
+  .step h3{font-size:19px;font-weight:600;margin:10px 0 8px;text-transform:none;font-family:'Barlow';color:var(--charcoal);}
+  .step p{font-size:14px;color:var(--mute);line-height:1.6;}
+
+  .platform .wrap{display:flex;gap:56px;align-items:center;flex-wrap:wrap;}
+  .platform-copy{flex:1;min-width:280px;}
+  .platform-visual{flex:1;min-width:280px;background:var(--charcoal);border-radius:10px;padding:24px;color:#fff;position:relative;overflow:hidden;}
+  .platform-visual .slash{position:absolute;bottom:-30px;right:-30px;width:120px;height:120px;background:var(--red);opacity:.18;transform:rotate(20deg);}
+  .fake-row{display:flex;justify-content:space-between;align-items:center;background:#2a2a2a;border-radius:6px;padding:12px 16px;margin-bottom:10px;font-size:13px;}
+  .fake-status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;text-transform:uppercase;}
+  .fs-ok{background:#1e3d2f;color:#7fd9a8;} .fs-gap{background:#4a3410;color:#eab04a;}
+
+  ul.checklist{list-style:none;margin:20px 0;}
+  ul.checklist li{font-size:14px;color:var(--charcoal);padding-left:22px;position:relative;margin-bottom:10px;}
+  ul.checklist li:before{content:"—";position:absolute;left:0;color:var(--red);font-weight:700;}
+
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .plan{border:1px solid var(--linelight);border-radius:10px;padding:30px 26px;position:relative;background:#fff;}
+  .plan.feat{border-color:var(--red);border-width:2px;}
+  .plan .badge{position:absolute;top:-12px;left:26px;background:var(--red);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 10px;border-radius:12px;}
+  .plan h3{font-family:'Barlow';font-size:17px;font-weight:600;margin-bottom:6px;color:var(--charcoal);}
+  .plan .price{font-family:'Barlow Condensed';font-size:36px;font-weight:700;margin:10px 0 4px;color:var(--charcoal);}
+  .plan .price span{font-size:14px;color:var(--mute);font-weight:500;font-family:'Barlow';}
+  .plan .desc{font-size:13px;color:var(--mute);margin-bottom:18px;}
+  .plan ul{list-style:none;}
+  .plan li{font-size:13px;padding:7px 0;border-top:1px solid var(--linelight);color:var(--charcoal);}
+  .plan li:first-child{border-top:none;}
+
+  footer{background:var(--charcoal);color:#999;padding:36px 28px;}
+  .footwrap{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-wrap:wrap;gap:16px;}
+  footer .wordmark{font-size:18px;color:#fff;}
+
+  .contact-form{background:#fff;border:1px solid var(--linelight);border-radius:10px;padding:30px;max-width:480px;}
+  .contact-form input,.contact-form textarea{width:100%;padding:11px 12px;border:1px solid var(--linelight);border-radius:5px;margin-bottom:12px;font-family:'Barlow';font-size:14px;}
+  .contact-form button{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:5px;font-weight:600;font-size:14px;cursor:pointer;}
+  @media(max-width:640px){h1.headline{font-size:40px;}}
+</style>
+</head>
+<body class="mode-warehouse">
+
+<header>
+  <div class="navwrap">
+    <div class="wordmark">
+      <svg viewBox="0 0 120 140" width="26" height="30"><path d="M60,8 C76,8 92,16 92,16 L92,56 C92,88 78,108 60,124 C42,108 28,88 28,56 L28,16 C28,16 44,8 60,8 Z" fill="none" stroke="#CC1E1E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/><path d="M74,40 C58,40 50,46 50,55 C50,66 70,66 70,77 C70,88 62,94 46,94" fill="none" stroke="#CC1E1E" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Sentinel<span>.</span>
+    </div>
+    <div class="toggle" role="tablist" aria-label="Industry">
+      <button id="tgl-wh" class="on" onclick="setMode('warehouse')">Warehouse</button>
+      <button id="tgl-hc" onclick="setMode('healthcare')">Healthcare</button>
+    </div>
+    <div class="navlinks">
+      <a class="navlink" href="#platform">Platform</a>
+      <a class="navlink" href="#pricing">Pricing</a>
+      <a class="navcta" href="#contact">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="accent2"></div><div class="accent"></div>
+  <div class="herowrap">
+    <div class="wh-only">
+      <div class="eyebrow">Warehouse &amp; distribution compliance</div>
+      <h1 class="headline">Stop pencil-whipped <em>safety checks.</em></h1>
+      <p class="subhead">Forklift, dock, and racking checks are required every shift. Sentinel replaces the paper clipboard with timestamped proof — so you see a missed check the moment it happens, not the week of an audit.</p>
+    </div>
+    <div class="hc-only">
+      <div class="eyebrow">Clinic &amp; facility compliance</div>
+      <h1 class="headline">Stop filing paper.<br>Start showing <em>proof.</em></h1>
+      <p class="subhead">Sentinel replaces clipboard compliance logs with real-time digital records — so you know exactly what's covered and what's not, before an inspector ever asks.</p>
+    </div>
+    <div class="herobtns">
+      <a class="btn btn-primary" href="#contact">Book a walk-through</a>
+      <a class="btn btn-outline" href="#platform">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<section id="platform" class="platform">
+  <div class="wrap">
+    <div class="platform-copy">
+      <div class="kicker">The platform</div>
+      <h2 class="h">One tap. One record. Zero guessing.</h2>
+      <p class="lede wh-only" style="margin-bottom:20px;">Every forklift pre-shift, dock check, and safety walkthrough gets tagged with NFC or QR. Staff tap, it's logged. You see gaps the moment they open — not the week of an audit.</p>
+      <p class="lede hc-only" style="margin-bottom:20px;">Every cleaning log, sterilizer check, and fire extinguisher visual gets tagged with NFC or QR. Staff tap, it's logged. You see gaps the moment they open — not the week of an audit.</p>
+      <ul class="checklist">
+        <li>Real-time compliance dashboard for managers and owners</li>
+        <li>Gap alerts the moment a required check is missed</li>
+        <li>Audit-ready export, timestamped and unchangeable</li>
+      </ul>
+    </div>
+    <div class="platform-visual">
+      <div class="slash"></div>
+      <div class="wh-only">
+        <div class="fake-row"><span>Forklift Pre-Shift — Unit 4</span><span class="fake-status fs-ok">Compliant</span></div>
+        <div class="fake-row"><span>Dock Door 3 Check</span><span class="fake-status fs-gap">Gap — due 2pm</span></div>
+        <div class="fake-row"><span>Racking Damage Walk</span><span class="fake-status fs-ok">Compliant</span></div>
+      </div>
+      <div class="hc-only">
+        <div class="fake-row"><span>Cleaning Log — Room 3</span><span class="fake-status fs-ok">Compliant</span></div>
+        <div class="fake-row"><span>Sterilizer Check</span><span class="fake-status fs-gap">Gap — due 2pm</span></div>
+        <div class="fake-row"><span>Fire Extinguisher — Visual</span><span class="fake-status fs-ok">Compliant</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--cream);">
+  <div class="wrap">
+    <div class="kicker">How it starts</div>
+    <h2 class="h">From walkthrough to live in one visit</h2>
+    <p class="lede">No IT department. No training manuals. Tags arrive ready to place — your team is logging within the hour.</p>
+    <div class="steps">
+      <div class="step"><div class="tag">Step one</div><h3>We scope your facility</h3>
+        <p class="wh-only">A short walkthrough identifies every required log point — forklift, dock, racking, fire aisle, first-aid, extinguisher visual.</p>
+        <p class="hc-only">A short walkthrough identifies every required log point — cleaning, sterilizer, sharps, temp, extinguisher visual.</p>
+      </div>
+      <div class="step"><div class="tag">Same week</div><h3>Your team starts logging</h3><p>Staff tap a tag, the record is instant. No app download, no login required at the point of use.</p></div>
+      <div class="step"><div class="tag">Ongoing</div><h3>You see everything, live</h3><p>Watch compliance status from anywhere. Get alerted the moment something's missed.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="kicker">Pricing</div>
+    <h2 class="h">Priced per location. No contracts to start.</h2>
+    <p class="lede">Setup fee covers tagging your facility. Monthly covers the platform.</p>
+
+    <div class="pricing-grid wh-only">
+      <div class="plan">
+        <h3>Shift Proof Starter</h3>
+        <div class="price">$299<span>/mo per location</span></div>
+        <div class="desc">Up to 5 stations</div>
+        <ul><li>NFC/QR tags included</li><li>Live dashboard</li><li>Weekly manager proof report</li></ul>
+      </div>
+      <div class="plan feat"><div class="badge">Most common</div>
+        <h3>Operations Proof Plus</h3>
+        <div class="price">$499<span>/mo per location</span></div>
+        <div class="desc">Unlimited stations</div>
+        <ul><li>Real-time gap alerts</li><li>Corrective actions</li><li>Monthly proof packet</li></ul>
+      </div>
+      <div class="plan">
+        <h3>Managed</h3>
+        <div class="price">$699<span>+/mo per location</span></div>
+        <div class="desc">Full platform + hands-on support</div>
+        <ul><li>Quarterly remote review</li><li>Compliance docs maintained</li><li>Priority support</li></ul>
+      </div>
+    </div>
+
+    <div class="pricing-grid hc-only">
+      <div class="plan">
+        <h3>Proof Logs Starter</h3>
+        <div class="price">$199<span>/mo per location</span></div>
+        <div class="desc">Up to 3 log areas</div>
+        <ul><li>NFC/QR tags included</li><li>Live dashboard</li><li>Weekly proof summary</li></ul>
+      </div>
+      <div class="plan feat"><div class="badge">Most common</div>
+        <h3>Proof Logs Plus</h3>
+        <div class="price">$399<span>/mo per location</span></div>
+        <div class="desc">Unlimited log areas</div>
+        <ul><li>Real-time gap alerts</li><li>3-year audit trail</li><li>Monthly evidence packet</li></ul>
+      </div>
+      <div class="plan">
+        <h3>Managed</h3>
+        <div class="price">$699<span>+/mo per location</span></div>
+        <div class="desc">Full platform + hands-on support</div>
+        <ul><li>Quarterly remote review</li><li>Compliance docs maintained</li><li>Priority support</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" style="background:var(--cream);">
+  <div class="wrap" style="max-width:640px;">
+    <div class="kicker">Why Sentinel exists</div>
+    <h2 class="h">Compliance you can prove, not just perform.</h2>
+    <p class="lede" style="margin-bottom:0;">Most operations run compliance on paper nobody checks until an inspection — or a lawsuit. Sentinel replaces "trust me, we did it" with a live, unchangeable record. Disabled veteran owned and operated.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap" style="display:flex;gap:56px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:280px;">
+      <div class="kicker">Get started</div>
+      <h2 class="h">Book a 15-minute walk-through</h2>
+      <p class="lede">We'll show you the dashboard live and tell you exactly what it costs to get started — no obligation.</p>
+    </div>
+    <div class="contact-form">
+      <input placeholder="Facility name">
+      <input placeholder="Your name">
+      <input placeholder="Email">
+      <textarea rows="3" placeholder="Anything specific you want covered?"></textarea>
+      <button type="button">Request walk-through</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footwrap">
+    <div>
+      <div class="wordmark">
+        <svg viewBox="0 0 120 140" width="22" height="26"><path d="M60,8 C76,8 92,16 92,16 L92,56 C92,88 78,108 60,124 C42,108 28,88 28,56 L28,16 C28,16 44,8 60,8 Z" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/><path d="M74,40 C58,40 50,46 50,55 C50,66 70,66 70,77 C70,88 62,94 46,94" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sentinel<span style="color:var(--red);">.</span>
+      </div>
+      <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-top:4px;">Compliance, Proven · Veteran Owned</div>
+    </div>
+    <div>Braselton, GA &nbsp;·&nbsp; Compliance management &amp; digital records</div>
+  </div>
+</footer>
+
+<script>
+  function setMode(mode){
+    document.body.classList.remove('mode-warehouse','mode-healthcare');
+    document.body.classList.add('mode-'+mode);
+    document.getElementById('tgl-wh').classList.toggle('on', mode==='warehouse');
+    document.getElementById('tgl-hc').classList.toggle('on', mode==='healthcare');
+  }
+</script>
+</body>
+</html>
