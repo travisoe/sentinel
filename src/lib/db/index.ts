@@ -23,6 +23,12 @@ import { computeCompliance as computeComplianceRows } from "../compliance";
 import type { DbAdapter } from "./adapter";
 import { createMemoryAdapter } from "./memory";
 
+export function isSupabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY,
+  );
+}
+
 export function isSheetsConfigured(): boolean {
   return Boolean(
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
@@ -31,10 +37,20 @@ export function isSheetsConfigured(): boolean {
   );
 }
 
+/** True when no real backend is configured and we're on the demo store. */
+export function isDemoBackend(): boolean {
+  return !isSupabaseConfigured() && !isSheetsConfigured();
+}
+
 let adapterPromise: Promise<DbAdapter> | null = null;
 async function getAdapter(): Promise<DbAdapter> {
   if (!adapterPromise) {
     adapterPromise = (async () => {
+      // Supabase is the primary backend (SOUL §13.8). Sheets remains supported.
+      if (isSupabaseConfigured()) {
+        const { createSupabaseAdapter } = await import("./supabase");
+        return createSupabaseAdapter();
+      }
       if (isSheetsConfigured()) {
         const { createSheetsAdapter } = await import("./sheets");
         return createSheetsAdapter();

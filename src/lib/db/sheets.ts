@@ -151,7 +151,10 @@ function rowToLog(row: string[]): LogEntry {
   };
 }
 
-function rowToClient(row: string[]): ClientRecord {
+// In the Sheets backend a client always has a spreadsheet id.
+type SheetClientRecord = ClientRecord & { spreadsheetId: string };
+
+function rowToClient(row: string[]): SheetClientRecord {
   return {
     client: row[0] ?? "",
     spreadsheetId: row[1] ?? "",
@@ -160,7 +163,7 @@ function rowToClient(row: string[]): ClientRecord {
   };
 }
 
-async function getClientRecords(): Promise<ClientRecord[]> {
+async function getClientRecords(): Promise<SheetClientRecord[]> {
   const rows = await readRange(masterSheetId(), "A2:D");
   return rows.filter((r) => r[0]).map(rowToClient);
 }
@@ -303,7 +306,7 @@ export function createSheetsAdapter(): DbAdapter {
       const rows = await readRange(id, "A2:D");
       const idx = rows.findIndex((r) => r[0] === record.client);
       const values = [
-        [record.client, record.spreadsheetId, record.pack, record.status],
+        [record.client, record.spreadsheetId ?? "", record.pack, record.status],
       ];
       if (idx >= 0) {
         await sheets.spreadsheets.values.update({

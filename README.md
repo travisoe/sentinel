@@ -11,7 +11,8 @@ Built to the spec in `SENTINEL_MASTER_BUILD_PROMPT.md`, which inherits from
 ## Stack
 
 - Next.js (App Router, React, TypeScript) + Tailwind CSS v4
-- Backend: Google Sheets API v4 (service-account, server-side only)
+- Backend: **Supabase (Postgres)** via the secret/service-role key, server-side only
+  (a Google Sheets adapter also ships, unused when Supabase is configured)
 - Auth: signed-cookie sessions (swappable for Auth.js/NextAuth)
 - Hosting: Vercel
 
@@ -22,8 +23,9 @@ component or route calls the Google API directly. This makes a future
 Supabase/Postgres migration a single-file swap (SOUL §13.8). Treat any direct
 Sheets call outside `src/lib/db/*` as a defect.
 
-If Google credentials are absent, the app automatically uses an in-memory demo
-store seeded with one warehouse client — so `npm run dev` works with zero secrets.
+Backend selection: **Supabase** if `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SECRET_KEY`
+are set, else Google Sheets if configured, else an in-memory demo store — so
+`npm run dev` works with zero secrets.
 
 ## Run locally
 
@@ -53,16 +55,25 @@ Then:
 Log types are configuration, not hardcode (`src/lib/packs.ts`): `warehouse`,
 `healthcare`, `generic`. A new industry = a new pack, zero app changes.
 
-## Google Sheets setup (production)
+## Supabase setup (production)
 
-1. Google Cloud: create a project, enable the Sheets API, create a **service
-   account**, download its JSON key.
-2. Set `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_PRIVATE_KEY`.
-3. Create a **Master Index** sheet with columns `Client | Spreadsheet ID | Pack |
-   Status`. Share it (and every client workbook) with the service-account email
-   as Editor. Set `MASTER_INDEX_SHEET_ID`.
-4. Each client gets a workbook with tabs `Tag Registry` and `Log Entries`
-   (auto-created with headers on first write).
+1. Create a Supabase project (free tier is fine).
+2. In the dashboard: **SQL Editor → New query**, paste the contents of
+   [`supabase/schema.sql`](supabase/schema.sql), and **Run**. This creates the
+   `clients` / `tags` / `log_entries` tables, the append-only trigger, RLS, and a
+   demo seed. It is idempotent.
+3. Set env vars (locally in `.env.local`, and in Vercel → Project → Settings →
+   Environment Variables):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `SUPABASE_SECRET_KEY` (server-only)
+   - `AUTH_SECRET` (`openssl rand -base64 32`)
+
+Append-only is enforced *in the database* by a trigger that blocks UPDATE/DELETE
+on `log_entries` — even for the service-role key.
+
+A Google Sheets adapter (`src/lib/db/sheets.ts`) also ships and is used only if
+Supabase env vars are absent and the `GOOGLE_*` vars are set.
 
 ## Hard guardrails (enforced in code)
 

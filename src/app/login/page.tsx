@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Wordmark, ShieldMark } from "@/components/Wordmark";
 import { getSession } from "@/lib/auth";
-import { isSheetsConfigured } from "@/lib/db";
 import { loginAction } from "./actions";
 
 export default async function LoginPage({
@@ -14,7 +13,8 @@ export default async function LoginPage({
   if (session) redirect(session.role === "sentinel" ? "/admin" : "/dashboard");
 
   const { error } = await searchParams;
-  const showDemoHint = !isSheetsConfigured();
+  // Show the demo credentials only while the default user list is in effect.
+  const showDemoHint = !process.env.AUTH_USERS;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-sentinel-offwhite px-6">

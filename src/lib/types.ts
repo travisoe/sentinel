@@ -54,10 +54,11 @@ export type TemplatePack = {
   logTypes: LogTypeDef[];
 };
 
-/** A client onboarding record kept in the Master Index. */
+/** A client onboarding record. `spreadsheetId` is Google-Sheets-specific and
+ * unused by the Supabase backend. */
 export type ClientRecord = {
   client: string;
-  spreadsheetId: string;
+  spreadsheetId?: string;
   pack: PackId;
   status: "Active" | "Inactive";
 };
