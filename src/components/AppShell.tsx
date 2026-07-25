@@ -16,11 +16,17 @@ export function AppShell({
   role: Role;
   email: string;
   clientName?: string;
-  active: "dashboard" | "admin";
+  active: "dashboard" | "admin" | "onboarding" | "settings";
   children: React.ReactNode;
 }) {
-  const nav: { key: "dashboard" | "admin"; label: string; href: string }[] = [
+  const nav: {
+    key: "dashboard" | "admin" | "onboarding" | "settings";
+    label: string;
+    href: string;
+  }[] = [
     { key: "dashboard", label: "Dashboard", href: "/dashboard" },
+    { key: "onboarding", label: "Install & stations", href: "/onboarding" },
+    { key: "settings", label: "Settings", href: "/settings" },
   ];
   if (role === "sentinel") {
     nav.push({ key: "admin", label: "Admin", href: "/admin" });

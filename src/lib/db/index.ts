@@ -22,6 +22,7 @@ import type {
 import { computeCompliance as computeComplianceRows } from "../compliance";
 import type { DbAdapter } from "./adapter";
 import { createMemoryAdapter } from "./memory";
+import * as platform from "./platform";
 
 export function isSupabaseConfigured(): boolean {
   return Boolean(
@@ -29,31 +30,19 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
-export function isSheetsConfigured(): boolean {
-  return Boolean(
-    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
-      process.env.GOOGLE_PRIVATE_KEY &&
-      process.env.MASTER_INDEX_SHEET_ID,
-  );
-}
-
 /** True when no real backend is configured and we're on the demo store. */
 export function isDemoBackend(): boolean {
-  return !isSupabaseConfigured() && !isSheetsConfigured();
+  return !isSupabaseConfigured();
 }
 
 let adapterPromise: Promise<DbAdapter> | null = null;
 async function getAdapter(): Promise<DbAdapter> {
   if (!adapterPromise) {
     adapterPromise = (async () => {
-      // Supabase is the primary backend (SOUL §13.8). Sheets remains supported.
+      // Supabase is the production backend; memory is the zero-secret demo.
       if (isSupabaseConfigured()) {
         const { createSupabaseAdapter } = await import("./supabase");
         return createSupabaseAdapter();
-      }
-      if (isSheetsConfigured()) {
-        const { createSheetsAdapter } = await import("./sheets");
-        return createSheetsAdapter();
       }
       return createMemoryAdapter();
     })();
@@ -176,3 +165,26 @@ export async function upsertClient(record: ClientRecord): Promise<void> {
   await adapter.upsertClient(record);
   invalidateClient(record.client);
 }
+
+/* ---- Platform operations (Supabase production backend) ---- */
+export const updateClientPlatform = platform.updateClientPlatform;
+export const listIssues = platform.listIssues;
+export const openIssue = platform.openIssue;
+export const updateIssue = platform.updateIssue;
+export const resolveOpenIssuesForTag = platform.resolveOpenIssuesForTag;
+export const addCorrectiveAction = platform.addCorrectiveAction;
+export const getStaffRoster = platform.getStaffRoster;
+export const addStaffMember = platform.addStaffMember;
+export const removeStaffMember = platform.removeStaffMember;
+export const getReportPreferences = platform.getReportPreferences;
+export const setReportPreferences = platform.setReportPreferences;
+export const listEnabledReportPreferences =
+  platform.listEnabledReportPreferences;
+export const markReportSent = platform.markReportSent;
+export const createSignupIntent = platform.createSignupIntent;
+export const attachCheckoutSession = platform.attachCheckoutSession;
+export const getSignupIntent = platform.getSignupIntent;
+export const completeSignupIntent = platform.completeSignupIntent;
+export const provisionPaidClient = platform.provisionPaidClient;
+export const syncClientBilling = platform.syncClientBilling;
+export const persistHealth = platform.persistHealth;

@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { appendLog, getClient, getTag } from "@/lib/db";
+import {
+  appendLog,
+  getClient,
+  getTag,
+  resolveOpenIssuesForTag,
+  updateClientPlatform,
+} from "@/lib/db";
 import { logTypeLabel } from "@/lib/packs";
 
 /**
@@ -43,8 +49,17 @@ export async function POST(request: Request) {
     loggedBy,
     notes: body.notes ? String(body.notes).trim() : undefined,
   });
+  await resolveOpenIssuesForTag(tag.client, tag.tagId, loggedBy).catch(
+    () => undefined,
+  );
 
   const client = await getClient(tag.client);
+  if (client && !client.firstScanAt) {
+    await updateClientPlatform(tag.client, {
+      firstScanAt: new Date().toISOString(),
+      onboardingStatus: "live",
+    }).catch(() => undefined);
+  }
   const label = logTypeLabel(client?.pack, tag.logType);
   const time = new Date().toLocaleString("en-US", {
     dateStyle: "medium",

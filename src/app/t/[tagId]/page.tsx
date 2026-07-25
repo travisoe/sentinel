@@ -1,5 +1,5 @@
 import { ShieldMark, Wordmark } from "@/components/Wordmark";
-import { getClient, getTag } from "@/lib/db";
+import { getClient, getStaffRoster, getTag } from "@/lib/db";
 import { getLogTypeDef, logTypeLabel } from "@/lib/packs";
 import { COPY } from "@/lib/copy";
 import { TapForm } from "./TapForm";
@@ -52,6 +52,7 @@ async function ActiveTap({
   logType: string;
 }) {
   const clientRec = await getClient(client);
+  const roster = await getStaffRoster(client).catch(() => []);
   const def = clientRec ? getLogTypeDef(clientRec.pack, logType) : undefined;
   const label = logTypeLabel(clientRec?.pack, logType);
 
@@ -61,6 +62,7 @@ async function ActiveTap({
       location={location}
       logTypeLabel={label}
       checklist={def?.checklist ?? []}
+      staffNames={roster.filter((member) => member.active).map((member) => member.displayName)}
     />
   );
 }

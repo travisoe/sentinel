@@ -15,8 +15,21 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.APP_BASE_URL ?? "https://app.sentinelsafety.io",
+  ),
   title: "Sentinel — Compliance, proven.",
   description: "Stop filing paper. Start showing proof.",
+  openGraph: {
+    title: "Sentinel — Compliance, proven.",
+    description: "Stop filing paper. Start showing proof.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Sentinel — Compliance, proven.",
+    description: "Stop filing paper. Start showing proof.",
+  },
 };
 
 export default function RootLayout({

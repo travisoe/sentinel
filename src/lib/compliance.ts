@@ -10,7 +10,13 @@
  *
  * This file touches no I/O. The data-access module feeds it tags + logs.
  */
-import type { ComplianceRow, LogEntry, Tag } from "./types";
+import type {
+  ClientRecord,
+  ComplianceRow,
+  HealthBand,
+  LogEntry,
+  Tag,
+} from "./types";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -129,4 +135,68 @@ export function reportStats(
   }
 
   return { checksCompleted, compliancePct, gapsCorrectedWithin24h };
+}
+
+export type AccountHealth = {
+  score: number;
+  band: HealthBand;
+  completionVsExpectedPct: number;
+  activeTagCoveragePct: number;
+  signals: string[];
+};
+
+export function calculateAccountHealth(
+  client: ClientRecord,
+  tags: Tag[],
+  logs30: LogEntry[],
+  rows: ComplianceRow[],
+): AccountHealth {
+  const active = tags.filter((tag) => tag.status === "Active");
+  const expected = active.reduce(
+    (sum, tag) =>
+      sum + Math.max(1, Math.ceil(30 / Math.max(1, tag.frequencyDays))),
+    0,
+  );
+  const completionVsExpectedPct =
+    expected === 0 ? 100 : Math.min(100, Math.round((logs30.length / expected) * 100));
+  const used = new Set(logs30.map((log) => log.tagId));
+  const activeTagCoveragePct =
+    active.length === 0
+      ? 100
+      : Math.round(
+          (active.filter((tag) => used.has(tag.tagId)).length / active.length) * 100,
+        );
+  const summary = summarize(rows);
+  const managerOverrides = logs30.filter((log) =>
+    (log.notes ?? "").toLowerCase().startsWith("manager completion recorded ("),
+  ).length;
+
+  let score = Math.round(
+    summary.compliancePct * 0.5 +
+      completionVsExpectedPct * 0.3 +
+      activeTagCoveragePct * 0.2,
+  );
+  score -= Math.min(20, summary.overdue * 5);
+  score -= Math.min(10, managerOverrides * 2);
+  score = Math.max(0, Math.min(100, score));
+  const band: HealthBand = score >= 80 ? "green" : score >= 55 ? "amber" : "red";
+
+  const signals: string[] = [];
+  if (
+    client.stationLimit != null &&
+    active.length >= Math.max(1, client.stationLimit - 1)
+  ) {
+    signals.push("Near station limit — Plus plan may fit.");
+  }
+  if (active.length >= 8 && completionVsExpectedPct >= 85) {
+    signals.push("High adoption — Managed review may add value.");
+  }
+  if (managerOverrides >= 3) {
+    signals.push("Repeated manual completions — review tag/process reliability.");
+  }
+  if (summary.overdue > 0) {
+    signals.push(`${summary.overdue} overdue station${summary.overdue === 1 ? "" : "s"}.`);
+  }
+
+  return { score, band, completionVsExpectedPct, activeTagCoveragePct, signals };
 }

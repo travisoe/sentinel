@@ -12,20 +12,18 @@ Built to the spec in `SENTINEL_MASTER_BUILD_PROMPT.md`, which inherits from
 
 - Next.js (App Router, React, TypeScript) + Tailwind CSS v4
 - Backend: **Supabase (Postgres)** via the secret/service-role key, server-side only
-  (a Google Sheets adapter also ships, unused when Supabase is configured)
-- Auth: signed-cookie sessions (swappable for Auth.js/NextAuth)
+- Auth: Supabase Auth with SSR cookie refresh and per-client profiles/RLS
+- Billing: Stripe Checkout, subscriptions, webhooks, and Customer Portal
+- Email: Resend weekly proof summaries
 - Hosting: Vercel
 
 ## The data-access boundary
 
-**All** database reads/writes go through one module: `src/lib/db/index.ts`. No
-component or route calls the Google API directly. This makes a future
-Supabase/Postgres migration a single-file swap (SOUL §13.8). Treat any direct
-Sheets call outside `src/lib/db/*` as a defect.
+**All** application database reads/writes go through `src/lib/db/index.ts`.
+Supabase implementation details remain inside `src/lib/db/*`.
 
 Backend selection: **Supabase** if `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SECRET_KEY`
-are set, else Google Sheets if configured, else an in-memory demo store — so
-`npm run dev` works with zero secrets.
+are set, otherwise an in-memory demo store.
 
 ## Run locally
 
@@ -39,8 +37,8 @@ Then:
 
 - **Tap Page (public):** http://localhost:3000/t/DMO-001
 - **Sign in:** http://localhost:3000/login
-  - Manager: `manager@demo` / `demo` → Dashboard
-  - Sentinel admin: `admin@sentinel` / `sentinel` → Admin console
+- **Pricing:** http://localhost:3000/pricing
+- **Self-serve registration:** http://localhost:3000/register
 
 ## Milestones (build order)
 
@@ -53,32 +51,34 @@ Then:
 ## Template packs
 
 Log types are configuration, not hardcode (`src/lib/packs.ts`): `warehouse`,
-`healthcare`, `generic`. A new industry = a new pack, zero app changes.
+`healthcare`, `construction`, `foodservice`, `hospitality`, `retail`,
+`education`, `manufacturing`, and `other`.
 
 ## Supabase setup (production)
 
 1. Create a Supabase project (free tier is fine).
 2. In the dashboard: **SQL Editor → New query**, paste the contents of
    [`supabase/schema.sql`](supabase/schema.sql), and **Run**. This creates the
-   `clients` / `tags` / `log_entries` tables, the append-only trigger, RLS, and a
-   demo seed. It is idempotent.
+   operational tables, account profiles, billing metadata, issue workflow,
+   staff roster, report preferences, append-only triggers, RLS, and a demo seed.
+   It is idempotent and must be re-run after schema updates.
 3. Set env vars (locally in `.env.local`, and in Vercel → Project → Settings →
    Environment Variables):
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SECRET_KEY` (server-only)
    - `AUTH_SECRET` (`openssl rand -base64 32`)
+   - Stripe, Resend, and cron variables listed in `.env.example`
+4. Set `SENTINEL_ADMIN_EMAIL` and a 12+ character
+   `SENTINEL_ADMIN_PASSWORD` locally, then run `npm run bootstrap:admin` once.
 
 Append-only is enforced *in the database* by a trigger that blocks UPDATE/DELETE
 on `log_entries` — even for the service-role key.
-
-A Google Sheets adapter (`src/lib/db/sheets.ts`) also ships and is used only if
-Supabase env vars are absent and the `GOOGLE_*` vars are set.
 
 ## Hard guardrails (enforced in code)
 
 - Log Entries are **append-only** — no update/delete path anywhere.
 - Timestamps are **server-set**; client time is never trusted.
-- Service-account credentials are **server-side only**.
+- Supabase and Stripe secret credentials are **server-side only**.
 - No native app; no login at the point of use.
 - Charcoal is product-UI chrome only — never a full-section marketing background.

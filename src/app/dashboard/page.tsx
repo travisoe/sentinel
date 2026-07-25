@@ -7,6 +7,7 @@ import { logTypeLabel } from "@/lib/packs";
 import { summarize } from "@/lib/compliance";
 import { COPY } from "@/lib/copy";
 import type { ComplianceRow } from "@/lib/types";
+import { recordManagerCompletionAction } from "./actions";
 
 // Dashboard reads are cached in the data layer (30–60s) per SOUL §13.8.
 export const dynamic = "force-dynamic";
@@ -39,6 +40,40 @@ export default async function DashboardPage({
   }
 
   const clientRec = await getClient(clientName);
+  if (
+    session.role === "owner" &&
+    (clientRec?.status === "Inactive" ||
+      clientRec?.billingStatus === "canceled" ||
+      clientRec?.billingStatus === "unpaid")
+  ) {
+    return (
+      <AppShell
+        role={session.role}
+        email={session.email}
+        clientName={clientName}
+        active="dashboard"
+      >
+        <div className="mx-auto max-w-xl px-6 py-16">
+          <div className="rounded-xl border border-gap-text/20 bg-gap-bg p-6">
+            <h1 className="wordmark text-2xl text-sentinel-charcoal">
+              Account needs attention
+            </h1>
+            <p className="mt-2 text-sentinel-charcoal/70">
+              Logging history remains protected. Update billing or contact
+              Sentinel to restore dashboard access.
+            </p>
+            {clientRec?.stripeCustomerId && (
+              <form action="/api/stripe/portal" method="post" className="mt-5">
+                <button className="rounded-md bg-sentinel-charcoal px-4 py-2 font-semibold text-white">
+                  Manage billing
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
   const rows = await computeCompliance(clientName);
   const summary = summarize(rows);
   const overdue = rows.filter((r) => r.status === "Overdue");
@@ -155,6 +190,54 @@ export default async function DashboardPage({
                   </tbody>
                 </table>
               </div>
+            </section>
+
+            <section className="mt-8 rounded-xl border border-sentinel-charcoal/10 bg-sentinel-white p-5">
+              <h2 className="wordmark text-lg text-sentinel-charcoal">
+                Record missed completion
+              </h2>
+              <p className="mt-1 text-sm text-sentinel-charcoal/60">
+                Use this when work was completed but the NFC/QR tap was missed.
+                This appends a new timestamped entry with your identity and
+                reason.
+              </p>
+              <form
+                action={recordManagerCompletionAction}
+                className="mt-4 grid gap-3 sm:grid-cols-5"
+              >
+                <input type="hidden" name="client" value={clientName} />
+                <select
+                  name="tagId"
+                  required
+                  className="rounded-md border border-sentinel-charcoal/20 px-3 py-2 text-sm sm:col-span-2"
+                >
+                  <option value="">Select station</option>
+                  {rows.map((row) => (
+                    <option key={row.tagId} value={row.tagId}>
+                      {row.tagId} — {row.location}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  name="reason"
+                  required
+                  className="rounded-md border border-sentinel-charcoal/20 px-3 py-2 text-sm"
+                >
+                  <option value="missed_scan">Missed scan</option>
+                  <option value="broken_nfc">Broken NFC tag</option>
+                  <option value="process_break">Process gap</option>
+                  <option value="offline_device">Device offline</option>
+                  <option value="other">Other</option>
+                </select>
+                <input
+                  name="notes"
+                  placeholder="Optional details"
+                  className="rounded-md border border-sentinel-charcoal/20 px-3 py-2 text-sm sm:col-span-2"
+                />
+                <button className="rounded-md bg-sentinel-red px-4 py-2 font-semibold text-sentinel-white sm:col-span-5 sm:w-fit">
+                  Append completion record
+                </button>
+              </form>
             </section>
           </>
         )}

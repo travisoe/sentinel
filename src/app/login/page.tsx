@@ -13,9 +13,6 @@ export default async function LoginPage({
   if (session) redirect(session.role === "sentinel" ? "/admin" : "/dashboard");
 
   const { error } = await searchParams;
-  // Show the demo credentials only while the default user list is in effect.
-  const showDemoHint = !process.env.AUTH_USERS;
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-sentinel-offwhite px-6">
       <div className="w-full max-w-sm">
@@ -76,20 +73,14 @@ export default async function LoginPage({
               Sign in
             </button>
           </form>
-
-          {showDemoHint && (
-            <div className="mt-6 rounded-md bg-sentinel-offwhite p-3 text-xs text-sentinel-charcoal/60">
-              <p className="font-semibold text-sentinel-charcoal/80">
-                Demo credentials
-              </p>
-              <p className="mt-1">
-                Manager: <code>manager@demo</code> / <code>demo</code>
-              </p>
-              <p>
-                Sentinel admin: <code>admin@sentinel</code> / <code>sentinel</code>
-              </p>
-            </div>
-          )}
+          <div className="mt-5 flex items-center justify-between text-sm">
+            <Link href="/forgot-password" className="text-sentinel-red hover:underline">
+              Forgot password?
+            </Link>
+            <Link href="/pricing" className="text-sentinel-charcoal/60 hover:text-sentinel-red">
+              New to Sentinel?
+            </Link>
+          </div>
         </div>
       </div>
     </div>

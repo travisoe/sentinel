@@ -1,23 +1,13 @@
-/**
- * Auth for the Dashboard + Admin surfaces (SENTINEL_MASTER_BUILD_PROMPT §2).
- * The Tap Page is public and unauthenticated by design (SOUL §7.1).
- *
- * MVP implementation: a small HMAC-signed session cookie over an env-configured
- * user list. It is intentionally dependency-light and self-contained so the app
- * deploys with only AUTH_SECRET set. It can be swapped for Auth.js/NextAuth
- * without touching callers — they only use getSession()/requireRole().
- *
- * Roles:
- *   'sentinel' — Sentinel staff; full Admin console access.
- *   'owner'    — client owner/manager; Dashboard access, scoped to their client.
- */
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type Role = "sentinel" | "owner";
 
 export type SessionUser = {
+  userId?: string;
   email: string;
   role: Role;
   client?: string; // required for 'owner'
@@ -25,7 +15,7 @@ export type SessionUser = {
 
 type UserRecord = SessionUser & { password: string };
 
-const COOKIE_NAME = "sentinel_session";
+const LEGACY_COOKIE_NAME = "sentinel_session";
 const MAX_AGE_S = 60 * 60 * 24 * 7; // 7 days
 
 function authSecret(): string {
@@ -43,6 +33,7 @@ function getUsers(): UserRecord[] {
       // fall through to defaults
     }
   }
+  if (process.env.NODE_ENV === "production") return [];
   return [
     { email: "admin@sentinel", password: "sentinel", role: "sentinel" },
     {
@@ -69,7 +60,7 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
-export function verifyCredentials(
+export function verifyLegacyCredentials(
   email: string,
   password: string,
 ): SessionUser | null {
@@ -101,9 +92,9 @@ function verifyToken(token: string): SessionUser | null {
   }
 }
 
-export async function createSession(user: SessionUser): Promise<void> {
+export async function createLegacySession(user: SessionUser): Promise<void> {
   const jar = await cookies();
-  jar.set(COOKIE_NAME, createToken(user), {
+  jar.set(LEGACY_COOKIE_NAME, createToken(user), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -113,13 +104,54 @@ export async function createSession(user: SessionUser): Promise<void> {
 }
 
 export async function destroySession(): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  if (supabase) await supabase.auth.signOut();
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  jar.delete(LEGACY_COOKIE_NAME);
 }
 
 export async function getSession(): Promise<SessionUser | null> {
+  const supabase = await createSupabaseServerClient();
+  if (supabase) {
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+    if (user?.email) {
+      const admin = createSupabaseAdminClient();
+      if (admin) {
+        const { data: profile } = await admin
+          .from("profiles")
+          .select("role,client")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (profile?.role === "sentinel" || profile?.role === "owner") {
+          return {
+            userId: user.id,
+            email: user.email,
+            role: profile.role,
+            client: profile.client ?? undefined,
+          };
+        }
+      }
+
+      // Safe transitional fallback: app_metadata is server-controlled.
+      const role = user.app_metadata?.role;
+      if (role === "sentinel" || role === "owner") {
+        return {
+          userId: user.id,
+          email: user.email,
+          role,
+          client:
+            typeof user.app_metadata?.client === "string"
+              ? user.app_metadata.client
+              : undefined,
+        };
+      }
+    }
+  }
+
+  // Temporary migration safety net for the existing Sentinel admin account.
   const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
+  const token = jar.get(LEGACY_COOKIE_NAME)?.value;
   if (!token) return null;
   return verifyToken(token);
 }
@@ -132,4 +164,37 @@ export async function requireRole(
   if (!session) return null;
   if (roles.length && !roles.includes(session.role)) return null;
   return session;
+}
+
+export async function signIn(
+  email: string,
+  password: string,
+): Promise<SessionUser | null> {
+  const supabase = await createSupabaseServerClient();
+  if (supabase) {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) return getSession();
+  }
+
+  const legacy = verifyLegacyCredentials(email, password);
+  if (!legacy) return null;
+  await createLegacySession(legacy);
+  return legacy;
+}
+
+export async function sendPasswordReset(email: string): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) throw new Error("Supabase Auth is not configured.");
+  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${baseUrl}/auth/callback?next=/reset-password`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function updatePassword(password: string): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) throw new Error("Supabase Auth is not configured.");
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(error.message);
 }

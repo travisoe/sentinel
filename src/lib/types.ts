@@ -38,7 +38,33 @@ export type ComplianceRow = Omit<Tag, "status"> & {
   status: ComplianceStatus;
 };
 
-export type PackId = "warehouse" | "healthcare" | "generic";
+export type PackId =
+  | "warehouse"
+  | "healthcare"
+  | "construction"
+  | "foodservice"
+  | "hospitality"
+  | "retail"
+  | "education"
+  | "manufacturing"
+  | "other";
+
+export type PlanId =
+  | "warehouse_starter"
+  | "warehouse_plus"
+  | "healthcare_starter"
+  | "healthcare_plus"
+  | "managed";
+
+export type BillingStatus =
+  | "manual"
+  | "checkout_pending"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid";
+
+export type HealthBand = "green" | "amber" | "red";
 
 export type LogTypeDef = {
   key: string; // 'forklift_preshift'
@@ -61,4 +87,46 @@ export type ClientRecord = {
   spreadsheetId?: string;
   pack: PackId;
   status: "Active" | "Inactive";
+  plan?: PlanId;
+  billingStatus?: BillingStatus;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  stationLimit?: number | null;
+  healthScore?: number;
+  healthBand?: HealthBand;
+  onboardingStatus?: string;
+  tagsOrderedAt?: string;
+  tagsShippedAt?: string;
+  installedAt?: string;
+  firstScanAt?: string;
+};
+
+export type IssueStatus = "open" | "acknowledged" | "resolved";
+export type IssueSeverity = "low" | "medium" | "high";
+
+export type Issue = {
+  id: number;
+  client: string;
+  tagId?: string;
+  type: string;
+  severity: IssueSeverity;
+  status: IssueStatus;
+  openedBy: string;
+  openedAt: string;
+  acknowledgedBy?: string;
+  acknowledgedAt?: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  notes?: string;
+  resolution?: string;
+};
+
+export type StaffMember = {
+  id: number;
+  client: string;
+  displayName: string;
+  active: boolean;
 };

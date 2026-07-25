@@ -84,9 +84,9 @@ export const HEALTHCARE_PACK: TemplatePack = {
   ],
 };
 
-export const GENERIC_PACK: TemplatePack = {
-  id: "generic",
-  label: "Generic",
+export const OTHER_PACK: TemplatePack = {
+  id: "other",
+  label: "Other",
   logTypes: [
     { key: "cleaning", label: "Cleaning", defaultFrequencyDays: 1 },
     { key: "equipment_check", label: "Equipment Check", defaultFrequencyDays: 7 },
@@ -100,10 +100,94 @@ export const GENERIC_PACK: TemplatePack = {
   ],
 };
 
+export const CONSTRUCTION_PACK: TemplatePack = {
+  id: "construction",
+  label: "Construction",
+  logTypes: [
+    { key: "site_walkthrough", label: "Site Safety Walkthrough", defaultFrequencyDays: 1 },
+    { key: "equipment_preuse", label: "Equipment Pre-Use Check", defaultFrequencyDays: 1 },
+    { key: "fall_protection", label: "Fall Protection Check", defaultFrequencyDays: 1 },
+    { key: "scaffold_inspection", label: "Scaffold Inspection", defaultFrequencyDays: 7 },
+    { key: "ppe_station_check", label: "PPE Station Check", defaultFrequencyDays: 7 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
+export const FOODSERVICE_PACK: TemplatePack = {
+  id: "foodservice",
+  label: "Food Service",
+  logTypes: [
+    { key: "line_sanitation", label: "Line Sanitation Check", defaultFrequencyDays: 1 },
+    { key: "cold_hold_temp", label: "Cold Hold Temp Log", defaultFrequencyDays: 1 },
+    { key: "hot_hold_temp", label: "Hot Hold Temp Log", defaultFrequencyDays: 1 },
+    { key: "dishwasher_sanitizer", label: "Dishwasher Sanitizer Check", defaultFrequencyDays: 1 },
+    { key: "walkin_inspection", label: "Walk-In Cooler Inspection", defaultFrequencyDays: 7 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
+export const HOSPITALITY_PACK: TemplatePack = {
+  id: "hospitality",
+  label: "Hospitality",
+  logTypes: [
+    { key: "guest_area_walk", label: "Guest Area Safety Walk", defaultFrequencyDays: 1 },
+    { key: "pool_safety_check", label: "Pool Safety Check", defaultFrequencyDays: 1 },
+    { key: "housekeeping_cleaning", label: "Housekeeping Cleaning Log", defaultFrequencyDays: 1 },
+    { key: "fire_exit_check", label: "Fire Exit / Egress Check", defaultFrequencyDays: 7 },
+    { key: "utility_room_check", label: "Utility Room Safety Check", defaultFrequencyDays: 7 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
+export const RETAIL_PACK: TemplatePack = {
+  id: "retail",
+  label: "Retail",
+  logTypes: [
+    { key: "opening_safety", label: "Opening Safety Checklist", defaultFrequencyDays: 1 },
+    { key: "closing_safety", label: "Closing Safety Checklist", defaultFrequencyDays: 1 },
+    { key: "stockroom_walk", label: "Stockroom Safety Walk", defaultFrequencyDays: 7 },
+    { key: "spill_kit_check", label: "Spill Kit Check", defaultFrequencyDays: 30 },
+    { key: "emergency_lighting", label: "Emergency Lighting Check", defaultFrequencyDays: 30 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
+export const EDUCATION_PACK: TemplatePack = {
+  id: "education",
+  label: "Education",
+  logTypes: [
+    { key: "classroom_safety", label: "Classroom Safety Check", defaultFrequencyDays: 1 },
+    { key: "playground_check", label: "Playground Equipment Check", defaultFrequencyDays: 1 },
+    { key: "hallway_exit_check", label: "Hallway / Exit Check", defaultFrequencyDays: 7 },
+    { key: "science_lab_check", label: "Science Lab Safety Check", defaultFrequencyDays: 7 },
+    { key: "first_aid_station", label: "First-Aid Station Check", defaultFrequencyDays: 30 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
+export const MANUFACTURING_PACK: TemplatePack = {
+  id: "manufacturing",
+  label: "Manufacturing",
+  logTypes: [
+    { key: "machine_preop", label: "Machine Pre-Op Check", defaultFrequencyDays: 1 },
+    { key: "guarding_check", label: "Machine Guarding Check", defaultFrequencyDays: 1 },
+    { key: "lockout_tagout", label: "LOTO Station Check", defaultFrequencyDays: 7 },
+    { key: "chemical_storage", label: "Chemical Storage Check", defaultFrequencyDays: 7 },
+    { key: "eyewash_station", label: "Eyewash Station Check", defaultFrequencyDays: 30 },
+    FIRE_EXTINGUISHER_VISUAL,
+  ],
+};
+
 export const PACKS: Record<PackId, TemplatePack> = {
   warehouse: WAREHOUSE_PACK,
   healthcare: HEALTHCARE_PACK,
-  generic: GENERIC_PACK,
+  construction: CONSTRUCTION_PACK,
+  foodservice: FOODSERVICE_PACK,
+  hospitality: HOSPITALITY_PACK,
+  retail: RETAIL_PACK,
+  education: EDUCATION_PACK,
+  manufacturing: MANUFACTURING_PACK,
+  other: OTHER_PACK,
 };
 
 export function getPack(id: PackId): TemplatePack {

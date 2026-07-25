@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import {
+  addCorrectiveAction,
   getTagsByClient,
   registerTags,
   setTagStatus,
+  updateClientPlatform,
+  updateIssue,
   updateTagMeaning,
   upsertClient,
 } from "@/lib/db";
@@ -96,6 +99,61 @@ export async function setTagStatusAction(formData: FormData) {
   const status = String(formData.get("status") ?? "Active") as TagStatus;
   await setTagStatus(tagId, status);
   revalidatePath("/admin");
+}
+
+export async function updateIssueAction(formData: FormData) {
+  const session = await requireRole("sentinel");
+  if (!session) throw new Error("Not authorized.");
+  const issueId = Number(formData.get("issueId"));
+  const client = String(formData.get("client") ?? "");
+  const status = String(formData.get("status") ?? "");
+  const note = String(formData.get("note") ?? "").trim();
+  if (!issueId || (status !== "acknowledged" && status !== "resolved")) {
+    throw new Error("Invalid issue update.");
+  }
+  await updateIssue(issueId, {
+    status,
+    actor: session.email,
+    resolution: note || undefined,
+    note: note || undefined,
+  });
+  if (status === "resolved" && note) {
+    await addCorrectiveAction({
+      issueId,
+      client,
+      action: note,
+      performedBy: session.email,
+    });
+  }
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+export async function updateInstallStatusAction(formData: FormData) {
+  await assertSentinel();
+  const client = String(formData.get("client") ?? "");
+  const stage = String(formData.get("stage") ?? "");
+  const now = new Date().toISOString();
+  if (stage === "ordered") {
+    await updateClientPlatform(client, {
+      tagsOrderedAt: now,
+      onboardingStatus: "tags_ordered",
+    });
+  } else if (stage === "shipped") {
+    await updateClientPlatform(client, {
+      tagsShippedAt: now,
+      onboardingStatus: "tags_shipped",
+    });
+  } else if (stage === "installed") {
+    await updateClientPlatform(client, {
+      installedAt: now,
+      onboardingStatus: "installed",
+    });
+  } else {
+    throw new Error("Invalid installation stage.");
+  }
+  revalidatePath("/admin");
+  revalidatePath("/onboarding");
 }
 
 // Re-export a helper so the page can list without importing db in a client comp.

@@ -61,7 +61,43 @@ type LogRow = {
   photo_url: string | null;
 };
 
-type ClientRow = { name: string; pack: string; status: string };
+type ClientRow = {
+  name: string;
+  pack: string;
+  status: string;
+  plan?: string | null;
+  billing_status?: string | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  station_limit?: number | null;
+  health_score?: number | null;
+  health_band?: string | null;
+  onboarding_status?: string | null;
+  tags_ordered_at?: string | null;
+  tags_shipped_at?: string | null;
+  installed_at?: string | null;
+  first_scan_at?: string | null;
+};
+
+function normalizePack(pack: string): PackId {
+  // Backward compatibility for early data before "other" rename.
+  if (pack === "generic") return "other";
+  const allowed: PackId[] = [
+    "warehouse",
+    "healthcare",
+    "construction",
+    "foodservice",
+    "hospitality",
+    "retail",
+    "education",
+    "manufacturing",
+    "other",
+  ];
+  return allowed.includes(pack as PackId) ? (pack as PackId) : "warehouse";
+}
 
 function toTag(r: TagRow): Tag {
   return {
@@ -100,8 +136,23 @@ function toLog(r: LogRow): LogEntry {
 function toClient(r: ClientRow): ClientRecord {
   return {
     client: r.name,
-    pack: (r.pack as PackId) || "warehouse",
+    pack: normalizePack(r.pack),
     status: r.status === "Inactive" ? "Inactive" : "Active",
+    plan: (r.plan ?? undefined) as ClientRecord["plan"],
+    billingStatus: (r.billing_status ?? "manual") as ClientRecord["billingStatus"],
+    stripeCustomerId: r.stripe_customer_id ?? undefined,
+    stripeSubscriptionId: r.stripe_subscription_id ?? undefined,
+    contactName: r.contact_name ?? undefined,
+    contactEmail: r.contact_email ?? undefined,
+    contactPhone: r.contact_phone ?? undefined,
+    stationLimit: r.station_limit,
+    healthScore: r.health_score ?? 100,
+    healthBand: (r.health_band ?? "green") as ClientRecord["healthBand"],
+    onboardingStatus: r.onboarding_status ?? "not_started",
+    tagsOrderedAt: r.tags_ordered_at ?? undefined,
+    tagsShippedAt: r.tags_shipped_at ?? undefined,
+    installedAt: r.installed_at ?? undefined,
+    firstScanAt: r.first_scan_at ?? undefined,
   };
 }
 
@@ -212,7 +263,26 @@ export function createSupabaseAdapter(): DbAdapter {
       const { error } = await db()
         .from("clients")
         .upsert(
-          { name: record.client, pack: record.pack, status: record.status },
+          {
+            name: record.client,
+            pack: record.pack,
+            status: record.status,
+            plan: record.plan ?? null,
+            billing_status: record.billingStatus ?? "manual",
+            stripe_customer_id: record.stripeCustomerId ?? null,
+            stripe_subscription_id: record.stripeSubscriptionId ?? null,
+            contact_name: record.contactName ?? null,
+            contact_email: record.contactEmail ?? null,
+            contact_phone: record.contactPhone ?? null,
+            station_limit: record.stationLimit ?? null,
+            health_score: record.healthScore ?? 100,
+            health_band: record.healthBand ?? "green",
+            onboarding_status: record.onboardingStatus ?? "not_started",
+            tags_ordered_at: record.tagsOrderedAt ?? null,
+            tags_shipped_at: record.tagsShippedAt ?? null,
+            installed_at: record.installedAt ?? null,
+            first_scan_at: record.firstScanAt ?? null,
+          },
           { onConflict: "name" },
         );
       if (error) throw new Error(error.message);

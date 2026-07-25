@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Wordmark, ShieldMark } from "@/components/Wordmark";
+import { Wordmark } from "@/components/Wordmark";
+import { PublicHeader } from "@/components/PublicHeader";
 import { COPY } from "@/lib/copy";
 
 const PILLARS = [
@@ -12,23 +13,7 @@ const PILLARS = [
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-sentinel-offwhite">
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <ShieldMark className="h-9 w-9" />
-          <Wordmark size="md" />
-        </div>
-        <nav className="flex items-center gap-6 text-sm font-medium">
-          <Link href="/dashboard" className="hover:text-sentinel-red">
-            Dashboard
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-md bg-sentinel-red px-4 py-2 text-sentinel-white hover:bg-sentinel-red/90"
-          >
-            Sign in
-          </Link>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6">
         <section className="py-16 sm:py-24">
@@ -44,10 +29,10 @@ export default function Home() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
-              href="/login"
+              href="/pricing"
               className="rounded-md bg-sentinel-red px-6 py-3 font-semibold text-sentinel-white hover:bg-sentinel-red/90"
             >
-              Open the dashboard
+              See pricing
             </Link>
             <Link
               href="/t/DMO-001"
@@ -75,8 +60,10 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-1 px-6 py-8 text-sm text-sentinel-charcoal/60">
           <Wordmark size="sm" tagline />
           <p className="mt-3">
-            Disabled veteran owned and operated. One tap. One record. Zero
-            guessing.
+            One tap. One record. Zero guessing.
+          </p>
+          <p className="mt-4 border-t border-sentinel-charcoal/10 pt-4 text-xs font-semibold uppercase tracking-[0.14em]">
+            Disabled veteran owned and operated
           </p>
         </div>
       </footer>

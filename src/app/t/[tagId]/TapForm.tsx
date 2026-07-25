@@ -24,11 +24,13 @@ export function TapForm({
   location,
   logTypeLabel,
   checklist,
+  staffNames,
 }: {
   tagId: string;
   location: string;
   logTypeLabel: string;
   checklist: string[];
+  staffNames: string[];
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
@@ -40,7 +42,8 @@ export function TapForm({
   const [success, setSuccess] = useState<Success | null>(null);
 
   useEffect(() => {
-    setName(readNameCookie());
+    const frame = requestAnimationFrame(() => setName(readNameCookie()));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const allChecked = checked.every(Boolean);
@@ -142,11 +145,19 @@ export function TapForm({
         <input
           id="name"
           type="text"
+          list={staffNames.length ? "staff-roster" : undefined}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. J. Rivera"
           className="mt-1 w-full rounded-lg border border-sentinel-charcoal/20 px-3 py-2.5 text-lg outline-none focus:border-sentinel-red"
         />
+        {staffNames.length > 0 && (
+          <datalist id="staff-roster">
+            {staffNames.map((staffName) => (
+              <option key={staffName} value={staffName} />
+            ))}
+          </datalist>
+        )}
       </div>
 
       <div className="mt-4">
