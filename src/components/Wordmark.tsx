@@ -1,7 +1,10 @@
+import Image from "next/image";
+
 /**
  * SENTINEL. wordmark — the red period is non-negotiable (SOUL §6.1).
- * On-screen SVG/text mark is a placeholder only; the true vector comes from the
- * Sentinel Drive via contact@getbrandedfast.com (SOUL §13.10) for any print use.
+ * Rendered as live text so it stays crisp at any size and recolours with the
+ * theme. For print, use the true vector from the Sentinel Drive via
+ * contact@getbrandedfast.com (SOUL §13.10).
  */
 export function Wordmark({
   className = "",
@@ -32,22 +35,21 @@ export function Wordmark({
   );
 }
 
-/** Small shield-S placeholder icon (screen only; not for print). */
+/**
+ * Shield-S mark. Call sites size it with square utilities (h-8 w-8), so
+ * object-contain preserves the mark's 222:288 portrait ratio instead of
+ * stretching it. Screen only; not for print.
+ */
 export function ShieldMark({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 56" className={className} aria-hidden="true">
-      <path
-        d="M24 2 4 10v18c0 14 9 22 20 26 11-4 20-12 20-26V10L24 2Z"
-        fill="#CC1E1E"
-      />
-      <path
-        d="M17 33c2 2.4 5 3.6 8 3.4 3.2-.2 5.6-1.9 5.6-4.6 0-6-13-3.4-13-9.4 0-2.6 2.6-4.4 6-4.4 2.6 0 4.8.9 6.4 2.4"
-        fill="none"
-        stroke="#FFFFFF"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Image
+      src="/brand/shield.png"
+      alt=""
+      aria-hidden="true"
+      width={222}
+      height={288}
+      className={`object-contain ${className}`}
+      priority
+    />
   );
 }
